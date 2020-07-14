@@ -1,0 +1,14 @@
+{
+  "name": "library-case-api",
+  "version": "1.0.0",
+  "description": "Library Case API for Invent Analytics Job Application",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Selcuk Onuk",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
