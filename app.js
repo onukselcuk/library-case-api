@@ -16,7 +16,7 @@ db.authenticate()
         );
     })
     .then(async () => {
-        //Disable foreign key check
+        //Disable foreign key check to be able to drop tables with foreign_key association
         await db.query("SET FOREIGN_KEY_CHECKS = 0", { raw: true });
     })
     .then(async () => {
@@ -27,13 +27,12 @@ db.authenticate()
         /**Create database associations */
         await createAssociations();
 
-        /**Create All Tables From All Models */
+        /**Create All Tables and sync all Models */
         await db.sync({ force: true });
         console.log("Tables are created");
 
         /**seed database with dummy data */
         await seedDB();
-
         console.log("Dummy Data is inserted to database");
     })
     .catch((err) => console.log("Unable to connect to the database:", err));
@@ -41,6 +40,7 @@ db.authenticate()
 /**Parse requests as json */
 app.use(express.json());
 
+/**Routes */
 app.use("/users", userRoutes);
 app.use("/books", bookRoutes);
 

@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../config/database");
 
+/**Define Returned_Books Table */
 const ReturnedBook = db.define(
     "Returned_Book",
     {

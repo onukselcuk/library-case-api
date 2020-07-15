@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../config/database");
 
+/**Define Users Table */
 const User = db.define(
     "User",
     {

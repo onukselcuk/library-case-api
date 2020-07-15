@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../config/database");
 
+/**Define Books Table */
 const Book = db.define(
     "Book",
     {
