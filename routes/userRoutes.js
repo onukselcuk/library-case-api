@@ -7,7 +7,7 @@ const Book = require("../models/Book");
 const { Op } = require("sequelize");
 const { check, validationResult } = require("express-validator");
 
-/**Getting user list with ids and names */
+//Getting user list with ids and names
 router.get("/", (req, res) => {
     User.findAll({ attributes: ["id", "name"] })
         .then((users) => {
@@ -20,7 +20,7 @@ router.get("/", (req, res) => {
         .catch((err) => res.status(500).json({ error: err }));
 });
 
-/**Getting a user with no borrow history */
+//Getting a user with no borrow history
 router.get("/:userId", (req, res) => {
     const userId = req.params.userId;
 
@@ -37,7 +37,7 @@ router.get("/:userId", (req, res) => {
             }
         ]
     })
-        .then(async (userData) => {
+        .then((userData) => {
             //If user doesn't exist, this returns an error
             if (!userData) {
                 return res.status(404).json({
@@ -74,7 +74,7 @@ router.get("/:userId", (req, res) => {
         );
 });
 
-/**Create User */
+//Create User
 
 router.post(
     "/",
@@ -97,41 +97,34 @@ router.post(
     }
 );
 
-/**User borrow book */
+//User borrow book
 
 router.post("/:userId/borrow/:bookId", async (req, res) => {
     const { userId, bookId } = req.params;
 
     try {
         //checks if user exist
-        await User.findOne({
-            where: { id: userId }
-        }).then((user) => {
-            if (!user) {
-                return res.status(404).json({ error: "User doesn't exist" });
-            }
-        });
+        const user = await User.findOne({ where: { id: userId } });
+        if (!user) {
+            return res.status(404).json({ error: "User doesn't exist" });
+        }
 
         // checks if the book exist
-        await Book.findOne({
-            where: { id: bookId }
-        }).then((book) => {
-            if (!book) {
-                return res.status(404).json({ error: "Book doesn't exist" });
-            }
-        });
+        const book = await Book.findOne({ where: { id: bookId } });
+        if (!book) {
+            return res.status(404).json({ error: "Book doesn't exist" });
+        }
 
         // checks if the book is borrowed by someone else.
-        await BorrowedBook.findOne({
+        const borrowedBook = await BorrowedBook.findOne({
             where: { book_id: bookId }
-        }).then((borrowedBook) => {
-            if (borrowedBook) {
-                return res.status(409).json({
-                    error:
-                        "This book is already borrowed by someone else, please try borrowing it later"
-                });
-            }
         });
+        if (borrowedBook) {
+            return res.status(409).json({
+                error:
+                    "This book is already borrowed by someone else, please try borrowing it later"
+            });
+        }
 
         // create a record of the borrowed book
         await BorrowedBook.create({ user_id: userId, book_id: bookId });
@@ -142,7 +135,7 @@ router.post("/:userId/borrow/:bookId", async (req, res) => {
     }
 });
 
-/**User return book*/
+//User return book*/
 router.post(
     "/:userId/return/:bookId",
     // check with express-validator
@@ -159,38 +152,28 @@ router.post(
 
         try {
             //check if user exists
-            await User.findOne({
-                where: { id: userId }
-            }).then((user) => {
-                if (!user) {
-                    return res
-                        .status(404)
-                        .json({ error: "User doesn't exist" });
-                }
-            });
+            const user = await User.findOne({ where: { id: userId } });
+            if (!user) {
+                return res.status(404).json({ error: "User doesn't exist" });
+            }
+
             //check if book exists
-            await Book.findOne({
-                where: { id: bookId }
-            }).then((book) => {
-                if (!book) {
-                    return res
-                        .status(404)
-                        .json({ error: "Book doesn't exist" });
-                }
-            });
+            const book = await Book.findOne({ where: { id: bookId } });
+            if (!book) {
+                return res.status(404).json({ error: "Book doesn't exist" });
+            }
+
             //check if the book already returned or never borrowed
-            await BorrowedBook.findOne({
-                where: {
-                    [Op.and]: [{ book_id: bookId }, { user_id: userId }]
-                }
-            }).then((borrowedBook) => {
-                if (!borrowedBook) {
-                    return res.status(404).json({
-                        error:
-                            "This book is already returned or never borrowed by you."
-                    });
-                }
+            const borrowedBook = await BorrowedBook.findOne({
+                where: { [Op.and]: [{ book_id: bookId }, { user_id: userId }] }
             });
+
+            if (!borrowedBook) {
+                return res.status(404).json({
+                    error:
+                        "This book is already returned or never borrowed by you."
+                });
+            }
 
             //since book is returned, this removes the book from borrowed books.
             await BorrowedBook.destroy({
@@ -207,29 +190,23 @@ router.post(
             });
 
             //find all return records of the book
-            await ReturnedBook.findAll({
-                where: {
-                    book_id: bookId
-                }
-            })
-                .then((bookReturns) => {
-                    //calculate average score of the book
-                    let totalScore = 0;
-                    bookReturns.forEach((current) => {
-                        totalScore += current.score;
-                    });
+            const bookReturns = await ReturnedBook.findAll({
+                where: { book_id: bookId }
+            });
 
-                    const averageScore = totalScore / bookReturns.length;
+            //calculate average score of the book
+            let totalScore = 0;
+            bookReturns.forEach((current) => {
+                totalScore += current.score;
+            });
 
-                    return averageScore;
-                })
-                .then(async (avgScore) => {
-                    // update book's average score
-                    await Book.update(
-                        { score: avgScore },
-                        { where: { id: bookId } }
-                    );
-                });
+            const averageScore = totalScore / bookReturns.length;
+
+            // update book's average score
+            await Book.update(
+                { score: averageScore },
+                { where: { id: bookId } }
+            );
 
             res.sendStatus(204);
         } catch (error) {

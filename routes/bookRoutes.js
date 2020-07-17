@@ -3,7 +3,7 @@ const router = express.Router();
 const Book = require("../models/Book");
 const { check, validationResult } = require("express-validator");
 
-/**Getting book list */
+//Getting book list
 router.get("/", (req, res) => {
     Book.findAll({ attributes: ["id", "name"] })
         .then((books) => {
@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
         .catch((err) => res.status(500).json({ error: err }));
 });
 
-/**Getting a book with its average user score */
+//Getting a book with its average user score
 router.get("/:bookId", (req, res) => {
     const bookId = req.params.bookId;
 
@@ -32,7 +32,7 @@ router.get("/:bookId", (req, res) => {
         .catch((err) => res.status(500).json({ error: err }));
 });
 
-/**Create Book */
+//Create Book
 router.post(
     "/",
     // check with express-validator
