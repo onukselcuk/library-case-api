@@ -2,13 +2,9 @@
 
 ## Description
 
----
-
 This app provides a REST API connected to a relational database for managing a library's users and book operations.
 
 ## Features
-
----
 
 -   List Users
 -   Access to a user's name, the books borrowed in the past and current borrows
@@ -20,8 +16,6 @@ This app provides a REST API connected to a relational database for managing a l
 -   Return and score a book
 
 ## Run The App
-
----
 
 1. Make sure MySQL database is active and running.
 2. Run below sql code in MySQL shell with root privileges. It create a user and a database named "library". You can change the user name and password, if you do so, you need to change database user name and password inside `.env` file.
